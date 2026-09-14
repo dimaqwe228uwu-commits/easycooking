@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartChef — Informatikkprosjekt</title>
+<style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f1f3f5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: linear-gradient(135deg, #ff6b6b, #ff8787);
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+        main {
+            max-width: 650px;
+            margin: 30px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #495057;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus {
+            border-color: #ff6b6b;
+            outline: none;
+        }
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 5px;
+        }
+        .radio-group label {
+            font-weight: normal;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn:hover { background-color: #fa5252; }
+        .btn:active { transform: scale(0.98); }
+        .dish-item {
+            background: #fff5f5;
+            border: 1px solid #ffe3e3;
+            padding: 15px;
+            margin: 12px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .dish-item:hover {
+            transform: translateX(4px);
+            border-color: #ffc9c9;
+        }
+        .recipe-box {
+            background: #e3faf2;
+            border: 2px dashed #12b886;
+            padding: 20px;
+            margin-top: 25px;
+            border-radius: 12px;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        .recipe-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .badge {
+            padding: 4px 10px;
+            font-size: 12px;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+        }
+        .easy { background-color: #40c057; }
+        .hard { background-color: #fab005; color: #333; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+</style>
+</head>
+<body>
+ 
+<header>
+<h1>🍳 Appen «SmartChef»</h1>
+<p>Finn oppskrifter basert på ingrediensene du allerede har</p>
+</header>
+ 
+<main>
+<div class="form-group">
+<label for="ingredients">Hva har du i kjøleskapet ditt?</label>
+<input type="text" id="ingredients" placeholder="For eksempel: kylling, potet, ost, egg">
+</div>
+ 
+    <div class="form-group">
+<label>Vanskelighetsgrad:</label>
+<div class="radio-group">
+<label><input type="radio" name="difficulty" value="all" checked> Alle oppskrifter</label>
+<label><input type="radio" name="difficulty" value="easy"> Kun enkle</label>
+<label><input type="radio" name="difficulty" value="hard"> Kun avanserte</label>
+</div>
+</div>
+ 
+    <button class="btn" onclick="findRecipes()">Finn oppskrifter 🌟</button>
+ 
+    <div id="results-section" style="margin-top: 30px;">
+<h3>Dine alternativer:</h3>
+<div id="dishes-list" style="color: #868e96;">Skriv inn ingredienser ovenfor og trykk på knappen...</div>
+</div>
+ 
+    <div id="recipe-display" class="recipe-box">
+<img id="recipe-image" class="recipe-img" src="" alt="Rett">
+<h3 id="recipe-title" style="margin-top:0; color: #0ca678;"></h3>
+<p><strong>Slik gjør du:</strong></p>
+<p id="recipe-text" style="line-height: 1.5; color: #2b2b2b;"></p>
+</div>
+</main>
+ 
+<script>
+    // Norsk database med oppskrifter og bilder
+    const database = [
+        {
+            name: "Sprøstekt potet med løk",
+            difficulty: "easy",
+            keywords: ["potet", "poteter", "løk"],
+            image: "https://images.unsplash.com/photo-1518310383802-640c2de311b2?auto=format&fit=crop&w=600&q=80",
+            instruction: "Skrell og kutt potetene i strimler. Stek dem i en varm panne med olje i ca. 10 minutter. Tilsett finhakket løk, skru ned varmen, smak til med salt og pepper. Stek videre i 10-15 minutter til alt er gyllent og sprøtt."
+        },
+        {
+            name: "Kyllingform med poteter og ost",
+            difficulty: "hard",
+            keywords: ["kylling", "potet", "poteter", "ost"],
+            image: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=600&q=80",
+            instruction: "Kutt kyllingfilet i biter og krydre med salt og favorittkrydderet ditt. Kutt poteter i skiver. Legg poteter og kylling lagvis i en ildfast form. Stek i ovnen på 180°C i ca. 35 minutter. Strø over rikelig med revet ost de siste 5 minuttene av steketiden."
+        },
+        {
+            name: "Kremet ostestekt omelett",
+            difficulty: "easy",
+            keywords: ["egg", "ost", "melk"],
+            image: "https://images.unsplash.com/photo-1494597564530-871f2b93ac55?auto=format&fit=crop&w=600&q=80",
+            instruction: "Visp sammen 2-3 egg med et par spiseskjeer melk og en klype salt. Hell blandingen i en varm panne med litt smør. Når omeletten begynner å stivne, strør du revet ost over den ene halvdelen, bretter den andre halvdelen over, og tar pannen av platen."
+        },
+        {
+            name: "Klassisk fransk løksuppe",
+            difficulty: "hard",
+            keywords: ["løk", "ost", "brød", "baguett"],
+            image: "https://images.unsplash.com/photo-1547592165-e1d17fed6005?auto=format&fit=crop&w=600&q=80",
+            instruction: "Hemmeligheten er å karamellisere løken sakte. Kutt 4 store løk i halvringer og stek dem i smør på lav varme i 30-40 minutter til de er brune og søте. Rør inn en spiseskje hvetemel, hell i varmt vann eller buljong, og la det småkoke i 20 minutter. Hell suppen i skåler, legg en ristet brødskive på toppen, dekk med ost og gratiner i ovnen til osten er gyllen."
+        }
+    ];
+ 
+    function findRecipes() {
+        const input = document.getElementById('ingredients').value.toLowerCase();
+        const difficultyFilter = document.querySelector('input[name="difficulty"]:checked').value;
+        const listDiv = document.getElementById('dishes-list');
+        const recipeDisplay = document.getElementById('recipe-display');
+        
+        recipeDisplay.style.display = 'none'; 
+        listDiv.innerHTML = '';
+ 
+        if (!input.trim()) {
+            listDiv.innerHTML = '⚠️ Vennligst skriv inn minst én ingrediens!';
+            return;
+        }
+ 
+        // Gjør teksten om til en liste med rensede ord
+        const userIngredients = input.split(',').map(item => item.trim());
+ 
+        // Søk etter matchende oppskrifter
+        const matches = database.filter(recipe => {
+            if (difficultyFilter !== 'all' && recipe.difficulty !== difficultyFilter) {
+                return false;
+            }
+            return recipe.keywords.some(keyword => userIngredients.includes(keyword));
+        });
+ 
+        if (matches.length === 0) {
+            listDiv.innerHTML = '😔 Ingen oppskrifter funnet. Prøv å skrive inn andre ingredienser.';
+            return;
+        }
+
+        // Vis listen over matchende oppskrifter
+        matches.forEach(recipe => {
+            const item = document.createElement('div');
+            item.className = 'dish-item';
+            
+            const badgeClass = recipe.difficulty === 'easy' ? 'easy' : 'hard';
+            const badgeText = recipe.difficulty === 'easy' ? 'Enkel' : 'Avansert';
+
+            item.innerHTML = `
+                <div>
+                    <strong>\${recipe.name}</strong> 
+                    <span class="badge \${badgeClass}">\${badgeText}</span>
+                </div>
+                <span>➔</span>
+            `;
+
+            // Legg til klikk-event for å vise hele oppskriften
+            item.onclick = () => {
+                document.getElementById('recipe-image').src = recipe.image;
+                document.getElementById('recipe-title').innerText = recipe.name;
+                document.getElementById('recipe-text').innerText = recipe.instruction;
+                recipeDisplay.style.display = 'block';
+                recipeDisplay.scrollIntoView({ behavior: 'smooth' });
+            };
+
+            listDiv.appendChild(item);
+        });
+    }
+</script>
+</body>
+</html>
